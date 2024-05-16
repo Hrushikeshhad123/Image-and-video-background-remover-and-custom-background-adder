@@ -7,3 +7,4 @@ rembg==2.0.56
 mediapipe
 opencv-python
 pathlib
+SelfiSegmentation
