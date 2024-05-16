@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 import io
 from rembg import remove
-
+import cv2
 def remove_bg(input_image):
     # Convert PIL Image to bytes
     with io.BytesIO() as buf:
