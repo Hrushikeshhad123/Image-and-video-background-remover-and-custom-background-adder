@@ -1,9 +1,7 @@
-!pip install opencv-python
-
 import streamlit as st
-import cv2
 from cvzone.SelfiSegmentationModule import SelfiSegmentation
 import tempfile
+import cvzone
 import os
 from PIL import Image
 import io
