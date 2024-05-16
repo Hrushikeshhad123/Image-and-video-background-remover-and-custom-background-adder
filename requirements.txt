@@ -8,4 +8,4 @@ mediapipe
 opencv-python
 pathlib
 cvzone
-SelfiSegmentation
+cvzone.SelfiSegmentation
