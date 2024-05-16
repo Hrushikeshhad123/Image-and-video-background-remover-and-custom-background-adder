@@ -2,7 +2,6 @@ import streamlit as st
 import cvzone
 from cvzone.SelfiSegmentationModule import SelfiSegmentation
 import tempfile
-import cvzone
 import os
 from PIL import Image
 import io
