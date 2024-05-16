@@ -4,3 +4,4 @@ cvzone
 Pillow
 numpy
 rembg
+mediapipe
