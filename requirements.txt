@@ -6,3 +6,4 @@ numpy
 rembg
 mediapipe
 opencv-python
+rembg[cli]
