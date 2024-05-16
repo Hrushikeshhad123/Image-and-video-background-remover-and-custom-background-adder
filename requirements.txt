@@ -8,5 +8,3 @@ mediapipe
 opencv-python
 rembg[cli]
 pathlib
-
-sys
