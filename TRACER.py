@@ -7,7 +7,7 @@ from PIL import Image
 import io
 import numpy as np
 from rembg import remove
-
+import cv2
 # Function to remove background of an image using rembg
 def remove_bg(input_image):
     # Convert PIL Image to bytes
