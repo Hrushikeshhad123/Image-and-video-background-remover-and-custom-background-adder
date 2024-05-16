@@ -6,5 +6,5 @@ numpy
 rembg==2.0.56
 rembg[cLi]
 mediapipe
-opencv-python
 pathlib
+opencv-python
