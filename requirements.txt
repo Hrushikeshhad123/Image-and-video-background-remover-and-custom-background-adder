@@ -1,5 +1,5 @@
 streamlit==1.34.0
-opencv-python-headless
+opencv
 cvzone==1.6.1
 Pillow
 numpy
@@ -8,4 +8,3 @@ mediapipe
 opencv-python
 pathlib
 cvzone
-cvzone.SelfiSegmentation
