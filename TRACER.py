@@ -42,7 +42,6 @@ def main():
                 f.write(video_file.read())
 
             # Initialize the SelfiSegmentation class. It will be used for background removal.
-            # model is 0 or 1 - 0 is general 1 is landscape(faster)
             segmentor = SelfiSegmentation(model=0)
 
             # Initialize the video capture object
@@ -53,42 +52,30 @@ def main():
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
             # Define the codec and create VideoWriter object
+            output_path = os.path.join(temp_dir, 'output.mp4')
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out = cv2.VideoWriter('output.mp4', fourcc, 30, (width, height))
+            out = cv2.VideoWriter(output_path, fourcc, 30, (width, height))
 
-            # Infinite loop to process each frame and display the processed video
-            while True:
-                # Capture a single frame
-                success, frame = cap.read()
-
-                if not success:
+            # Process the video
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
                     break
 
-                # Use the SelfiSegmentation class to remove the background
-                processed_frame = segmentor.removeBG(frame)
+                # Remove background from the frame
+                processed_frame = segmentor.removeBG(frame, (255, 255, 255), threshold=0.8)
 
                 # Write the processed frame to the output video file
                 out.write(processed_frame)
 
-                # Display the processed frame
-                cv2.imshow('Processed Video', processed_frame)
-
-                # Check for 'q' key press to break the loop
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-
-            # Release the video capture object and the output video writer
             cap.release()
             out.release()
 
-            # Close all OpenCV windows
-            cv2.destroyAllWindows()
-
             # Display the processed video using Streamlit
-            st.video('output.mp4')
+            st.video(output_path)
 
             # Add a download button for the processed video
-            with open('output.mp4', 'rb') as f:
+            with open(output_path, 'rb') as f:
                 video_bytes = f.read()
             st.download_button(label="Download Processed Video", data=video_bytes, file_name="processed_video.mp4", mime="video/mp4")
 
