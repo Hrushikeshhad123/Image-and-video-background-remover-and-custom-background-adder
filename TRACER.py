@@ -1,5 +1,4 @@
 import streamlit as st
-import cv2
 from cvzone.SelfiSegmentationModule import SelfiSegmentation
 import tempfile
 import os
@@ -46,66 +45,7 @@ def main():
 
     if option == "Video":
         st.subheader("Video Background Removal")
-
-        # Specify the path to the input video file
-        video_file = st.file_uploader("Upload a video file", type=["mp4"])
-
-        if video_file is not None:
-            # Save the uploaded file to a temporary directory
-            temp_dir = tempfile.mkdtemp()
-            video_path = os.path.join(temp_dir, video_file.name)
-            with open(video_path, "wb") as f:
-                f.write(video_file.read())
-
-            # Initialize the SelfiSegmentation class. It will be used for background removal.
-            segmentor = SelfiSegmentation(model=0)
-
-            # Initialize the video capture object
-            cap = cv2.VideoCapture(video_path)
-
-            # Set the width and height of the output video
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-            # Define the codec and create VideoWriter object
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out = cv2.VideoWriter('output.mp4', fourcc, 30, (width, height))
-
-            # Infinite loop to process each frame and display the processed video
-            while True:
-                # Capture a single frame
-                success, frame = cap.read()
-
-                if not success:
-                    break
-
-                # Use the SelfiSegmentation class to remove the background
-                processed_frame = segmentor.removeBG(frame)
-
-                # Write the processed frame to the output video file
-                out.write(processed_frame)
-
-                # Display the processed frame
-                cv2.imshow('Processed Video', processed_frame)
-
-                # Check for 'q' key press to break the loop
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-
-            # Release the video capture object and the output video writer
-            cap.release()
-            out.release()
-
-            # Close all OpenCV windows
-            cv2.destroyAllWindows()
-
-            # Display the processed video using Streamlit
-            st.video('output.mp4')
-
-            # Add a download button for the processed video
-            with open('output.mp4', 'rb') as f:
-                video_bytes = f.read()
-            st.download_button(label="Download Processed Video", data=video_bytes, file_name="processed_video.mp4", mime="video/mp4")
+        st.write("Video background removal is not supported in this version.")
 
     elif option == "Image":
         st.subheader("Background Removal for Images")
