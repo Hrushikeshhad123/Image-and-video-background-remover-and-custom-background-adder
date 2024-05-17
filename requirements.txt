@@ -1,11 +1,8 @@
 streamlit==1.34.0
-opencv-python-headless
-cvzone
-Pillow
-numpy
+opencv-python-headless==4.9.0.80
+cvzone==1.6.1
+Pillow==10.3.0
+numpy==1.26.4
 rembg==2.0.56
-rembg[cLi]
-mediapipe
-pathlib
-opencv-python
-cv2
+mediapipe==0.10.14
+pathlib==1.0.1
