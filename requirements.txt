@@ -1,6 +1,5 @@
-streamlit==0.89.0
+streamlit
 opencv-python-headless
-cvzone==1.5.3
-numpy
-Pillow==8.3.2
-backgroundremover==1.0.6
+cvzone
+Pillow
+backgroundremover
