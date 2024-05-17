@@ -3,6 +3,6 @@ numpy==1.26.4
 mediapipe==0.10.14
 pathlib==1.0.1
 streamlit==0.89.0
-opencv-python-headless==4.5.3.56
+opencv-python-headless
 cvzone==1.5.3
 backgroundremover==1.0.6
