@@ -5,42 +5,30 @@ import tempfile
 import os
 from PIL import Image
 import io
-import numpy as np
-from backgroundremover import remove
+from rembg import remove
 
-# Function to remove background of an image using backgroundremover
+# Function to remove background of an image using rembg
 def remove_bg(input_image):
-    temp_input = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-    temp_output = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    # Convert PIL Image to bytes
+    with io.BytesIO() as buf:
+        input_image.save(buf, format='PNG')
+        input_bytes = buf.getvalue()
 
-    # Save the input image to the temporary input file
-    input_image.save(temp_input.name)
+    # Use rembg to remove the background
+    output_bytes = remove(input_bytes)
 
-    # Use backgroundremover to remove the background
-    remove(
-        src_img_path=temp_input.name,
-        out_img_path=temp_output.name,
-        model_name="u2net",
-        alpha_matting=True,
-        alpha_matting_foreground_threshold=240,
-        alpha_matting_background_threshold=10,
-        alpha_matting_erode_structure_size=10,
-        alpha_matting_base_size=1000
-    )
-
-    # Open the output image
-    output_image = Image.open(temp_output.name)
-
-    # Clean up temporary files
-    temp_input.close()
-    temp_output.close()
-    os.remove(temp_input.name)
-    os.remove(temp_output.name)
+    # Convert output bytes to PIL Image
+    output_image = Image.open(io.BytesIO(output_bytes))
 
     return output_image
 
 def main():
     st.title("Background Removal for Images and Videos with Streamlit")
+
+    # Check Streamlit version for compatibility
+    if st.__version__ < "1.0.0":
+        st.error("Please upgrade Streamlit to version 1.0.0 or higher.")
+        return
 
     option = st.sidebar.selectbox("Select Option", ["Image", "Video"])
 
@@ -58,6 +46,7 @@ def main():
                 f.write(video_file.read())
 
             # Initialize the SelfiSegmentation class. It will be used for background removal.
+            # model is 0 or 1 - 0 is general 1 is landscape(faster)
             segmentor = SelfiSegmentation(model=0)
 
             # Initialize the video capture object
@@ -86,18 +75,15 @@ def main():
                 out.write(processed_frame)
 
                 # Display the processed frame
-                cv2.imshow('Processed Video', processed_frame)
+                st.image(processed_frame, channels="BGR")
 
                 # Check for 'q' key press to break the loop
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if st.button("Stop"):
                     break
 
             # Release the video capture object and the output video writer
             cap.release()
             out.release()
-
-            # Close all OpenCV windows
-            cv2.destroyAllWindows()
 
             # Display the processed video using Streamlit
             st.video('output.mp4')
@@ -145,4 +131,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
