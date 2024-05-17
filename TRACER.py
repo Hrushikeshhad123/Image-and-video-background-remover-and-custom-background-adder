@@ -1,5 +1,4 @@
 import streamlit as st
-import cv2
 from cvzone.SelfiSegmentationModule import SelfiSegmentation
 import tempfile
 import os
