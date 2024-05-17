@@ -5,30 +5,27 @@ import tempfile
 import os
 from PIL import Image
 import io
-from rembg import remove
+from backgroundremover.bg import remove
 
-# Function to remove background of an image using rembg
-def remove_bg(input_image):
-    # Convert PIL Image to bytes
-    with io.BytesIO() as buf:
-        input_image.save(buf, format='PNG')
-        input_bytes = buf.getvalue()
+# Function to remove background of an image using backgroundremover.bg
+def remove_bg(src_img_path, out_img_path):
+    model_choices = ["u2net", "u2net_human_seg", "u2netp"]
+    
+    with open(src_img_path, "rb") as f:
+        data = f.read()
+    
+    img = remove(data, model_name=model_choices[0],
+                 alpha_matting=True,
+                 alpha_matting_foreground_threshold=240,
+                 alpha_matting_background_threshold=10,
+                 alpha_matting_erode_structure_size=10,
+                 alpha_matting_base_size=1000)
 
-    # Use rembg to remove the background
-    output_bytes = remove(input_bytes)
-
-    # Convert output bytes to PIL Image
-    output_image = Image.open(io.BytesIO(output_bytes))
-
-    return output_image
+    with open(out_img_path, "wb") as f:
+        f.write(img)
 
 def main():
     st.title("Background Removal for Images and Videos with Streamlit")
-
-    # Check Streamlit version for compatibility
-    if st.__version__ < "1.0.0":
-        st.error("Please upgrade Streamlit to version 1.0.0 or higher.")
-        return
 
     option = st.sidebar.selectbox("Select Option", ["Image", "Video"])
 
@@ -56,9 +53,8 @@ def main():
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-            # Define the codec and create VideoWriter object
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out = cv2.VideoWriter('output.mp4', fourcc, 30, (width, height))
+            # Open a placeholder for video display
+            placeholder = st.empty()
 
             # Infinite loop to process each frame and display the processed video
             while True:
@@ -71,27 +67,18 @@ def main():
                 # Use the SelfiSegmentation class to remove the background
                 processed_frame = segmentor.removeBG(frame)
 
-                # Write the processed frame to the output video file
-                out.write(processed_frame)
-
                 # Display the processed frame
-                st.image(processed_frame, channels="BGR")
+                placeholder.image(processed_frame, channels="BGR")
 
                 # Check for 'q' key press to break the loop
-                if st.button("Stop"):
+                if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
-            # Release the video capture object and the output video writer
+            # Release the video capture object
             cap.release()
-            out.release()
 
-            # Display the processed video using Streamlit
-            st.video('output.mp4')
-
-            # Add a download button for the processed video
-            with open('output.mp4', 'rb') as f:
-                video_bytes = f.read()
-            st.download_button(label="Download Processed Video", data=video_bytes, file_name="processed_video.mp4", mime="video/mp4")
+            # Close all OpenCV windows
+            cv2.destroyAllWindows()
 
     elif option == "Image":
         st.subheader("Background Removal for Images")
@@ -100,34 +87,21 @@ def main():
         def select_image():
             file_path = st.file_uploader("Upload Image", type=["jpg", "png"])
             if file_path is not None:
-                img = Image.open(file_path)
-                return img
+                return file_path
             return None
 
-        uploaded_img = select_image()
-        if uploaded_img is not None:
-            bg_removed_img = remove_bg(uploaded_img)
+        uploaded_img_path = select_image()
+        if uploaded_img_path is not None:
+            with open(uploaded_img_path, "rb") as f:
+                img_data = f.read()
+
+            temp_output_path = "output.png"  # Temporary path for output image
+            remove_bg(uploaded_img_path, temp_output_path)
+
+            with open(temp_output_path, "rb") as f:
+                bg_removed_img = Image.open(f)
+
             st.image(bg_removed_img, caption='Background Removed Image', use_column_width=True)
-
-            # Ask user to upload background image
-            background_image = st.file_uploader("Upload Background Image", type=["jpg", "png"])
-            if background_image is not None:
-                background_img = Image.open(background_image)
-
-                # Resize background image to match processed image dimensions
-                background_img = background_img.resize(bg_removed_img.size)
-
-                # Overlay the processed image onto the background image
-                final_image = Image.alpha_composite(background_img.convert("RGBA"), bg_removed_img.convert("RGBA"))
-
-                # Display the final image with the input image background
-                st.image(final_image, caption='Processed Image with Input Image Background', use_column_width=True)
-
-                # Add a download button for the final image with the input image background
-                img_stream_with_input_bg = io.BytesIO()
-                final_image.save(img_stream_with_input_bg, format="PNG")
-                img_bytes_with_input_bg = img_stream_with_input_bg.getvalue()
-                st.download_button(label="Download Processed Image with Input Image Background", data=img_bytes_with_input_bg, file_name="processed_image_with_input_bg.png", mime="image/png")
 
 if __name__ == "__main__":
     main()
